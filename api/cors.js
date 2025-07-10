@@ -1,12 +1,16 @@
 import CorsAnywhere from 'cors-anywhere';
 
-const corsProxy = CorsAnywhere.createServer({
+// Create the proxy server
+const proxy = CorsAnywhere.createServer({
   originWhitelist: [], // Allow all origins
-  requireHeader: ['origin', 'x-requested-with'],
+  requireHeader: [], // <-- IMPORTANT: Remove required headers that Vercel doesn't provide
   removeHeaders: ['cookie', 'cookie2'],
 });
 
+// Export as Vercel serverless handler
 export default function handler(req, res) {
-  req.url = req.url.replace(/^\/api\/cors\??/, '/'); // Normalize URL for CORS Anywhere
-  corsProxy.emit('request', req, res);
+  // Required by cors-anywhere to work
+  req.url = req.url.replace(/^\/api\/cors/, '') || '/';
+  
+  proxy.emit('request', req, res);
 }
